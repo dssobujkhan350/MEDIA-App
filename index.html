@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>MEDIA App</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden}
+.feed{height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory}
+.post{height:100dvh;width:100%;position:relative;scroll-snap-align:start;background:#111;overflow:hidden}
+.video{width:100%;height:100%;object-fit:cover}
+.topbar{position:absolute;top:0;left:0;width:100%;height:120px;padding:48px 22px 15px;display:flex;align-items:center;justify-content:space-between;z-index:5;background:linear-gradient(#0008,transparent)}
+.tabs{display:flex;gap:15px;align-items:center}
+.tabs button{background:none;border:0;color:#ddd;font-size:19px}
+.tabs button.active{color:#fff;font-weight:bold}
+.search{color:#fff;background:none;border:0;font-size:34px}
+.actions{position:absolute;right:12px;bottom:145px;display:flex;flex-direction:column;align-items:center;gap:3px;z-index:4}
+.profile-pic{width:55px;height:55px;border-radius:50%;border:2px solid white;object-fit:cover}
+.action{width:48px;height:48px;background:transparent;border:0;color:white;font-size:32px;cursor:pointer;text-shadow:0 1px 4px #333}
+.action.liked{color:#ff3040}.action.saved{color:#ffdf5d}
+.count{font-size:13px;font-weight:bold;margin-bottom:9px;text-shadow:0 1px 3px black}
+.info{position:absolute;left:18px;right:85px;bottom:112px;z-index:3;text-shadow:0 1px 4px black}
+.username-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.username-row h3{font-size:18px;margin:0}
+.follow{background:#ff2450;color:white;border:0;border-radius:5px;padding:6px 12px;font-size:13px;font-weight:bold}
+.follow.following{background:#555}
+.info p{font-size:16px;line-height:1.4}
+.sound{font-size:14px;margin-top:15px}
+.download-menu{display:none;position:absolute;z-index:8;top:45%;left:50%;transform:translate(-50%,-50%);background:white;color:black;padding:20px;border-radius:12px;width:210px;text-align:center}
+.download-menu button{background:black;color:white;border:0;padding:12px 20px;border-radius:8px;margin:3px}
+.search-panel{display:none;position:fixed;top:95px;left:12px;right:12px;z-index:20;background:#171717;padding:12px;border-radius:12px}
+.search-panel input{width:80%;padding:12px;border:0;border-radius:8px}
+.search-panel button{padding:10px;border:0}
+nav{position:fixed;bottom:0;left:0;width:100%;height:75px;background:#000;border-top:1px solid #333;display:flex;justify-content:space-around;align-items:center;z-index:10}
+nav button{background:none;border:0;color:white;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px}
+nav .ico{font-size:27px}
+.create{width:52px;height:34px;background:white!important;color:black!important;border-radius:9px!important;box-shadow:-5px 0 #00d8e9,5px 0 #ff2450;font-size:27px!important}
+</style>
+</head>
+<body>
+<div class="feed" id="feed">
+<section class="post">
+<video class="video" loop playsinline src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+<div class="topbar">
+ <div class="tabs">
+  <button onclick="tab(this)">Following</button>
+  <button class="active" onclick="tab(this)">For You</button>
+ </div>
+ <button class="search" onclick="openSearch()">⌕</button>
+</div>
+<div class="actions">
+ <img class="profile-pic" src="https://i.pravatar.cc/100?img=47" alt="Profile">
+ <button class="action" onclick="like(this)">♡</button><div class="count">125.6K</div>
+ <button class="action" onclick="comment()">●</button><div class="count">3,567</div>
+ <button class="action" onclick="shareVideo()">➤</button><div class="count">12.8K</div>
+ <button class="action" onclick="save(this)">▣</button><div class="count">28.4K</div>
+ <button class="action" onclick="downloadVideo(this)">⬇</button><div class="count">6.7K</div>
+</div>
+<div class="info">
+ <div class="username-row">
+  <h3>@Cute_Girl</h3>
+  <button class="follow" onclick="follow(this)">+ Follow</button>
+ </div>
+ <p>বাংলা বিনোদনের নতুন ঠিকানা ❤️<br>#Bangla #Drama #Entertainment</p>
+ <div class="sound">♫ Original Sound - Cute_Girl</div>
+</div>
+<div class="download-menu">
+ <p>⬇ Download Video</p>
+ <button onclick="downloadCurrent()">Download</button>
+ <button onclick="closeDownload()">Cancel</button>
+</div>
+</section>
+</div>
+<div class="search-panel" id="searchPanel">
+ <input type="search" placeholder="Search videos...">
+ <button onclick="closeSearch()">✕</button>
+</div>
+<input type="file" id="uploadFile" accept="video/*" hidden>
+<nav>
+ <button onclick="home()"><span class="ico">⌂</span>Home</button>
+ <button onclick="friends()"><span class="ico">♧</span>Friends</button>
+ <button onclick="upload()"><span class="create">＋</span></button>
+ <button onclick="inbox()"><span class="ico">▢</span>Inbox</button>
+ <button onclick="profile()"><span class="ico">♙</span>Profile</button>
+</nav>
+<script>
+let currentPost=null;
+function tab(btn){document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function follow(btn){const isFollowing=btn.classList.toggle('following');btn.textContent=isFollowing?'Following':'+ Follow'}
+function like(btn){btn.classList.toggle('liked');btn.textContent=btn.classList.contains('liked')?'♥':'♡'}
+function save(btn){btn.classList.toggle('saved');btn.textContent=btn.classList.contains('saved')?'✓':'▣'}
+function comment(){alert('Comment section')}
+async function shareVideo(){if(navigator.share){try{await navigator.share({title:'Cute Girl Video',url:location.href})}catch(e){}}else{alert('Share সুবিধা পাওয়া যাচ্ছে না')}}
+function downloadVideo(btn){currentPost=btn.closest('.post');currentPost.querySelector('.download-menu').style.display='block'}
+function closeDownload(){document.querySelectorAll('.download-menu').forEach(m=>m.style.display='none')}
+function downloadCurrent(){if(!currentPost)return;const video=currentPost.querySelector('video');const a=document.createElement('a');a.href=video.currentSrc||video.src;a.download='video.mp4';a.click();closeDownload()}
+function openSearch(){document.getElementById('searchPanel').style.display='block'}
+function closeSearch(){document.getElementById('searchPanel').style.display='none'}
+function home(){document.getElementById('feed').scrollTo({top:0,behavior:'smooth'})}
+function friends(){alert('Friends section')}
+function inbox(){alert('Inbox section')}
+function profile(){alert('Profile section')}
+function upload(){document.getElementById('uploadFile').click()}
+document.getElementById('uploadFile').addEventListener('change',function(){if(!this.files.length)return;const url=URL.createObjectURL(this.files[0]);const video=document.querySelector('.post video');video.src=url;video.play()});
+document.querySelectorAll('.post').forEach(post=>{
+ let lastTap=0,timer;
+ post.addEventListener('click',e=>{if(e.target.closest('button'))return;const now=Date.now();if(now-lastTap<300){const btn=post.querySelector('.action');if(!btn.classList.contains('liked'))like(btn);lastTap=0}else lastTap=now});
+ post.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;timer=setTimeout(()=>{currentPost=post;post.querySelector('.download-menu').style.display='block'},650)});
+ ['pointerup','pointercancel','pointerleave'].forEach(event=>post.addEventListener(event,()=>clearTimeout(timer)));
+ post.addEventListener('contextmenu',e=>e.preventDefault());
+});
+</script>
+</body>
+</html>
